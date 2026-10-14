@@ -1,6 +1,8 @@
 param([string] $PythonExe = '')
 $ErrorActionPreference = 'Stop'
-if ([string]::IsNullOrWhiteSpace($PythonExe)) { $PythonExe = (Get-Command python -CommandType Application -ErrorAction Stop).Source }
+if ([string]::IsNullOrWhiteSpace($PythonExe)) {
+    $PythonExe = (Get-Command python -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
+}
 $PythonExe = [IO.Path]::GetFullPath($PythonExe)
 if (-not (Test-Path -LiteralPath $PythonExe -PathType Leaf)) { throw "Python executable missing: $PythonExe" }
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
