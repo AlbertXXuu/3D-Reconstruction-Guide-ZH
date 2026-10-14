@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-14",
+  "models": {
+    "dust3r": {
+      "repo_url": "https://github.com/naver/dust3r",
+      "commit": "a53d073bb07455f5a3e7fcbeaaea240c159c4f08",
+      "checkpoint": "checkpoints/dust3r/DUSt3R_ViTLarge_BaseDecoder_512_dpt.pth",
+      "checkpoint_bytes": 2285005731,
+      "dependencies": "environments/requirements-dust3r-core.txt",
+      "torch_dependencies": "environments/requirements-torch-cu121.txt",
+      "source_type": "official public Git repository, pinned revision",
+      "checkpoint_url": "https://download.europe.naverlabs.com/ComputerVision/DUSt3R/DUSt3R_ViTLarge_BaseDecoder_512_dpt.pth",
+      "checkpoint_sha256": "9f194a32e34fc124ed10f64115b8e848b7da87c2d1ed131d34b4806721c19dbd",
+      "submodules": {
+        "croco": "743ee71a2a9bf57cea6832a9064a70a0597fcfcb"
+      },
+      "patches": [
+        "patches/dust3r-gradio4.patch"
+      ],
+      "patch_scope": "dust3r/demo.py only: visible 3D viewer and explicit GLB download; no inference changes"
+    },
+    "mast3r": {
+      "repo_url": "https://github.com/naver/mast3r",
+      "commit": "f5209afc300cec36239a7ac992263f36847bbba0",
+      "checkpoint": "checkpoints/mast3r/MASt3R_ViTLarge_BaseDecoder_512_catmlpdpt_metric.pth",
+      "checkpoint_bytes": 2754910614,
+      "dependencies": "environments/requirements-mast3r-core.txt",
+      "torch_dependencies": "environments/requirements-torch-cu121.txt",
+      "source_type": "official public Git repository, pinned revision",
+      "checkpoint_url": "https://download.europe.naverlabs.com/ComputerVision/MASt3R/MASt3R_ViTLarge_BaseDecoder_512_catmlpdpt_metric.pth",
+      "checkpoint_sha256": "e28f91b488554653e2b46ddae9c78c1143e0bcb2e27d3e26cdb0b717f1568eb2",
+      "submodules": {
+        "dust3r": "3cc8c88c413bb9e34c41db0e0eef99c2ee010b12",
+        "croco": "d7de0705845239092414480bd829228723bf20de"
+      }
+    },
+    "vggt": {
+      "repo_url": "https://github.com/facebookresearch/vggt",
+      "commit": "a288dd0f14786c93483e45524328726ab7b1b4ce",
+      "checkpoint": "checkpoints/vggt/model.pt",
+      "checkpoint_bytes": 5026874952,
+      "dependencies": "environments/requirements-vggt-core.txt",
+      "torch_dependencies": "environments/requirements-torch-cu121.txt",
+      "source_type": "official public Git repository, pinned revision",
+      "checkpoint_url": "https://huggingface.co/facebook/VGGT-1B/resolve/860abec7937da0a4c03c41d3c269c366e82abdf9/model.pt",
+      "checkpoint_sha256": "d15bf50a8615c8225ed48b51ea5cac673d82442ec0309036df555a053253afe0",
+      "checkpoint_revision": "860abec7937da0a4c03c41d3c269c366e82abdf9",
+      "checkpoint_hash_matches_official": true
+    }
+  }
+}

@@ -1,0 +1,25 @@
+name: Project checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout maintained files
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+      - name: Check Python, JSON and local documentation links
+        run: python -B scripts/check-project.py
+      - name: Parse PowerShell scripts and tutorial commands
+        shell: powershell
+        run: .\scripts\check-powershell.ps1

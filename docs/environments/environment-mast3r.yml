@@ -1,0 +1,8 @@
+# Independent Python base; does not inherit the DUSt3R environment.
+name: mast3r-demo
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.11.13
+  - pip=25.1

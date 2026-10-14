@@ -1,0 +1,5 @@
+# Official PyTorch 2.5.1 Windows/Linux CUDA 12.1 wheels.
+# Install this file before the model's requirements-*-core.txt.
+--index-url https://download.pytorch.org/whl/cu121
+torch==2.5.1
+torchvision==0.20.1

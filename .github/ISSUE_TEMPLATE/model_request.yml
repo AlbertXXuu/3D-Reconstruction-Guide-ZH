@@ -1,0 +1,55 @@
+name: 新增模型或教程
+description: 提出有官方来源和明确使用场景的模型支持、安装教程或验证需求。
+title: "[需求] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请说明希望用户完成的具体操作，以及官方资料和可用验证资源。
+        模型支持需要独立环境、入口、中文教程与实际验证；未完成的验证会明确标注。请勿上传权重、私有数据或访问令牌。
+  - type: input
+    id: model_name
+    attributes:
+      label: 模型或教程名称
+      placeholder: "模型名 / 希望补充的操作主题"
+    validations:
+      required: true
+  - type: textarea
+    id: official_sources
+    attributes:
+      label: 官方来源
+      description: 提供官方源码、文档或论文链接；如涉及模型权重，附官方获取方法及许可页面。知道推荐 commit 或 release 时也请列出。
+      placeholder: |
+        官方仓库 / 文档：
+        推荐 commit / release（如有）：
+        官方权重来源与许可（如适用）：
+    validations:
+      required: true
+  - type: textarea
+    id: use_case
+    attributes:
+      label: 想完成的操作
+      description: 说明使用场景、预期输入与输出，以及现有教程为什么不能满足。给出可验收的步骤或结果。
+      placeholder: "例如：在 Windows 上用两张样图完成……，并导出……"
+    validations:
+      required: true
+  - type: textarea
+    id: resources
+    attributes:
+      label: 可用于验证的资源
+      description: 列出可用 OS、GPU / 显存、驱动、磁盘空间、可公开样图，以及你能帮助执行的检查。资源未知或暂时无法验证时请明确写出。
+      placeholder: |
+        OS / GPU / 显存 / 驱动：
+        可用磁盘与下载条件：
+        可公开样图或官方样例：
+        可协助的安装 / 推理 / 页面验证：
+        暂时无法验证的部分：
+    validations:
+      required: true
+  - type: textarea
+    id: existing_work
+    attributes:
+      label: 现有资料或尝试
+      description: 可补充已经运行的结果、遇到的限制或愿意提交的内容；引用第三方教程时请注明来源。
+    validations:
+      required: false

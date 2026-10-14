@@ -1,0 +1,9 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {"label": "Demo: DUSt3R", "type": "process", "command": "powershell.exe", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/scripts/start-demo.ps1", "-Model", "dust3r"], "problemMatcher": []},
+    {"label": "Demo: MASt3R", "type": "process", "command": "powershell.exe", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/scripts/start-demo.ps1", "-Model", "mast3r"], "problemMatcher": []},
+    {"label": "Demo: VGGT", "type": "process", "command": "powershell.exe", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/scripts/start-demo.ps1", "-Model", "vggt"], "problemMatcher": []},
+    {"label": "Demo: Stop", "type": "process", "command": "powershell.exe", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/scripts/start-demo.ps1", "-Stop"], "problemMatcher": []}
+  ]
+}

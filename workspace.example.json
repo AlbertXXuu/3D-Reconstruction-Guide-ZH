@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "timezone": "Asia/Shanghai",
+  "models": {
+    "dust3r": {
+      "python": "C:/path/to/conda/envs/dust3r-demo/python.exe",
+      "script": "scripts/dust3r_demo.py",
+      "repository": "repos/dust3r",
+      "port": 7860,
+      "checkpoint": "checkpoints/dust3r/DUSt3R_ViTLarge_BaseDecoder_512_dpt.pth"
+    },
+    "mast3r": {
+      "python": "C:/path/to/conda/envs/mast3r-demo/python.exe",
+      "script": "scripts/mast3r_demo.py",
+      "repository": "repos/mast3r",
+      "port": 7861,
+      "checkpoint": "checkpoints/mast3r/MASt3R_ViTLarge_BaseDecoder_512_catmlpdpt_metric.pth"
+    },
+    "vggt": {
+      "python": "C:/path/to/conda/envs/vggt-demo/python.exe",
+      "script": "scripts/vggt_demo.py",
+      "repository": "repos/vggt",
+      "port": 7862,
+      "checkpoint": "checkpoints/vggt/model.pt"
+    }
+  }
+}

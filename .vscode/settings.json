@@ -1,0 +1,5 @@
+{
+  "files.exclude": {"repos": true, "**/__pycache__": true, "**/.ruff_cache": true},
+  "search.exclude": {"**/data/**": true, "**/checkpoints/**": true, "**/outputs/**": true, "**/archive/**": true, "**/.venvs/**": true},
+  "files.watcherExclude": {"**/data/**": true, "**/checkpoints/**": true, "**/outputs/**": true, "**/archive/**": true, "**/.venvs/**": true}
+}

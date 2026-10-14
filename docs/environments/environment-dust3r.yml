@@ -1,0 +1,8 @@
+# Python base only. Complete installation steps are in README.md.
+name: dust3r-demo
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.11.13
+  - pip=25.1

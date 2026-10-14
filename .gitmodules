@@ -1,0 +1,9 @@
+[submodule "repos/dust3r"]
+	path = repos/dust3r
+	url = https://github.com/naver/dust3r.git
+[submodule "repos/mast3r"]
+	path = repos/mast3r
+	url = https://github.com/naver/mast3r.git
+[submodule "repos/vggt"]
+	path = repos/vggt
+	url = https://github.com/facebookresearch/vggt.git

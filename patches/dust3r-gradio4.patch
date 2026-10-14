@@ -1,0 +1,82 @@
+diff --git a/dust3r/demo.py b/dust3r/demo.py
+--- a/dust3r/demo.py
++++ b/dust3r/demo.py
+@@ -179,7 +179,13 @@
+         imgs.append(rgb(depths[i]))
+         imgs.append(rgb(confs[i]))
+ 
+-    return scene, outfile, imgs
++    return scene, outfile, outfile, imgs
++
++
++def get_3D_model_and_download(*args, **kwargs):
++    """Return one GLB path for the viewer and one for the download component."""
++    outfile = get_3D_model_from_scene(*args, **kwargs)
++    return outfile, outfile
+ 
+ 
+ def set_scenegraph_options(inputfiles, winsize, refid, scenegraph_type):
+@@ -205,7 +211,7 @@
+ 
+ def main_demo(tmpdirname, model, device, image_size, server_name, server_port, silent=False):
+     recon_fun = functools.partial(get_reconstructed_scene, tmpdirname, model, device, silent, image_size)
+-    model_from_scene_fun = functools.partial(get_3D_model_from_scene, tmpdirname, silent)
++    model_from_scene_fun = functools.partial(get_3D_model_and_download, tmpdirname, silent)
+     with gradio.Blocks(css=""".gradio-container {margin: 0 !important; min-width: 100%};""", title="DUSt3R Demo") as demo:
+         # scene state is save so that you can change conf_thr, cam_size... without rerunning the inference
+         scene = gradio.State(None)
+@@ -241,7 +247,15 @@
+                 clean_depth = gradio.Checkbox(value=True, label="Clean-up depthmaps")
+                 transparent_cams = gradio.Checkbox(value=False, label="Transparent cameras")
+ 
+-            outmodel = gradio.Model3D()
++            # Gradio 5 does not always give Model3D a usable implicit height.
++            # Keep the viewer visible and use the solid mode expected by the
++            # triangle-mesh GLB exported above.
++            outmodel = gradio.Model3D(
++                label="3D reconstruction",
++                display_mode="solid",
++                height=600,
++            )
++            outmodel_download = gradio.File(label="Download scene.glb", interactive=False)
+             outgallery = gradio.Gallery(label='rgb,depth,confidence', columns=3, height="100%")
+ 
+             # events
+@@ -255,29 +269,29 @@
+                           inputs=[inputfiles, schedule, niter, min_conf_thr, as_pointcloud,
+                                   mask_sky, clean_depth, transparent_cams, cam_size,
+                                   scenegraph_type, winsize, refid],
+-                          outputs=[scene, outmodel, outgallery])
++                          outputs=[scene, outmodel, outmodel_download, outgallery])
+             min_conf_thr.release(fn=model_from_scene_fun,
+                                  inputs=[scene, min_conf_thr, as_pointcloud, mask_sky,
+                                          clean_depth, transparent_cams, cam_size],
+-                                 outputs=outmodel)
++                                 outputs=[outmodel, outmodel_download])
+             cam_size.change(fn=model_from_scene_fun,
+                             inputs=[scene, min_conf_thr, as_pointcloud, mask_sky,
+                                     clean_depth, transparent_cams, cam_size],
+-                            outputs=outmodel)
++                            outputs=[outmodel, outmodel_download])
+             as_pointcloud.change(fn=model_from_scene_fun,
+                                  inputs=[scene, min_conf_thr, as_pointcloud, mask_sky,
+                                          clean_depth, transparent_cams, cam_size],
+-                                 outputs=outmodel)
++                                 outputs=[outmodel, outmodel_download])
+             mask_sky.change(fn=model_from_scene_fun,
+                             inputs=[scene, min_conf_thr, as_pointcloud, mask_sky,
+                                     clean_depth, transparent_cams, cam_size],
+-                            outputs=outmodel)
++                             outputs=[outmodel, outmodel_download])
+             clean_depth.change(fn=model_from_scene_fun,
+                                inputs=[scene, min_conf_thr, as_pointcloud, mask_sky,
+                                        clean_depth, transparent_cams, cam_size],
+-                               outputs=outmodel)
++                                 outputs=[outmodel, outmodel_download])
+             transparent_cams.change(model_from_scene_fun,
+                                     inputs=[scene, min_conf_thr, as_pointcloud, mask_sky,
+                                             clean_depth, transparent_cams, cam_size],
+-                                    outputs=outmodel)
+-    demo.launch(share=False, server_name=server_name, server_port=server_port)
++                                    outputs=[outmodel, outmodel_download])
++    demo.launch(share=False, server_name=server_name, server_port=server_port, show_api=False)

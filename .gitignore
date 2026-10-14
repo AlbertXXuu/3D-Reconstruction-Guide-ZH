@@ -1,0 +1,15 @@
+# Model repositories keep their own provenance and local patches.
+/repos/
+/archive/
+/data/
+/checkpoints/
+/.venvs/
+/.venv/
+/outputs/
+/workspace.json
+**/.idea/
+__pycache__/
+*.py[cod]
+.env
+*.tmp
+Thumbs.db
