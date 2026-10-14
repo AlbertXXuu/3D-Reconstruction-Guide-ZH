@@ -15,6 +15,7 @@ Chinese practical guides for DUSt3R, MASt3R and VGGT on Windows with NVIDIA GPUs
 | 03 | 检查报错、显存、端口和下载问题 | [故障排查](docs/troubleshooting.md) |
 | 04 | 核对哪些步骤实际运行过、什么仍未验证 | [验证记录](docs/validation.md) |
 | 05 | 补充教程、报告问题或接入新模型 | [贡献指南](CONTRIBUTING.md) |
+| 06 | 新论文、新工具和本地实验怎样补充到 Guide | [扩展指南](docs/extending.md) · [文章目录](docs/articles/README.md) · [项目目录](docs/projects/README.md) |
 
 仅克隆不会安装依赖或下载权重。完成安装教程后再双击三个启动 CMD。源码全部来自公开的官方仓库；DUSt3R 的网页补丁单独保存，不需要作者的私有源码仓库。
 
@@ -52,6 +53,9 @@ VGGT 官方 kitchen 双图，宽度 294：三维场景可查看，GLB 与 NPZ �
 README.md                 # 第一入口
 docs/                     # 安装、模型操作、排错、验证
   models/                 # 每个模型一份操作页
+  articles/               # 原创阅读笔记与方法说明
+  projects/               # 数据集、工具与组合实验操作
+  templates/              # 可复制的文章/项目/模型模板
   environments/           # Python 基础与固定直接依赖
 scripts/                  # 启动、检查、smoke、源码补丁入口
 patches/                  # 明确标注的第三方源码补丁
@@ -60,7 +64,7 @@ workspace.example.json    # 通用配置模板
 checkpoints/ data/ outputs/ # 本机权重、输入、结果；不提交
 ```
 
-`workspace.json` 是安装教程生成的本机配置，不随仓库分发。新增内容使用既有结构，先提交可验收的一条流程，再扩展支持范围；详见[文档导航](docs/README.md)和[模型目录](docs/models/README.md)。
+`workspace.json` 是安装教程生成的本机配置，不随仓库分发。配置生成器按模板中的模型遍历，启动器按本机配置选择模型；新增模型无需修改固定名称枚举。共享权重可使用本机绝对路径。新增内容使用既有结构，先提交可验收的一条流程，再扩展支持范围；详见[文档导航](docs/README.md)和[扩展指南](docs/extending.md)。
 
 ## 来源、许可与维护
 

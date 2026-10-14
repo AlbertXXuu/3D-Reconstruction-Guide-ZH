@@ -4,6 +4,10 @@
     {"label": "Demo: DUSt3R", "type": "process", "command": "powershell.exe", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/scripts/start-demo.ps1", "-Model", "dust3r"], "problemMatcher": []},
     {"label": "Demo: MASt3R", "type": "process", "command": "powershell.exe", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/scripts/start-demo.ps1", "-Model", "mast3r"], "problemMatcher": []},
     {"label": "Demo: VGGT", "type": "process", "command": "powershell.exe", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/scripts/start-demo.ps1", "-Model", "vggt"], "problemMatcher": []},
+    {"label": "Demo: Configured model", "type": "process", "command": "powershell.exe", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/scripts/start-demo.ps1", "-Model", "${input:configuredModel}"], "problemMatcher": []},
     {"label": "Demo: Stop", "type": "process", "command": "powershell.exe", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/scripts/start-demo.ps1", "-Stop"], "problemMatcher": []}
+  ],
+  "inputs": [
+    {"id": "configuredModel", "type": "promptString", "description": "workspace.json 中的模型名称", "default": "dust3r"}
   ]
 }

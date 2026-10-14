@@ -150,28 +150,13 @@ foreach ($weight in $weights) {
 [workspace.example.json](../workspace.example.json)只含占位解释器路径；本步生成本机 `workspace.json`，该文件不随仓库分发。用模板与各环境实际 `sys.executable` 生成配置。已有可用配置时先备份再调整，不必重新生成。
 
 ```powershell
-$config = Get-Content -LiteralPath workspace.example.json -Raw -Encoding UTF8 | ConvertFrom-Json
-foreach ($model in @('dust3r', 'mast3r', 'vggt')) {
-    $probe = @(conda run -n "$model-demo" python -c "import sys; print(sys.executable)")
-    if ($LASTEXITCODE -ne 0) { throw "Cannot locate environment: $model-demo" }
-    $pythonPath = ($probe | Where-Object { $_.Trim() } | Select-Object -Last 1).Trim()
-    if (-not (Test-Path -LiteralPath $pythonPath -PathType Leaf)) { throw "Python not found: $pythonPath" }
-    $config.models.$model.python = $pythonPath.Replace('\', '/')
-}
-$json = $config | ConvertTo-Json -Depth 6
-$utf8 = New-Object System.Text.UTF8Encoding($false)
-$configurationPath = Join-Path (Get-Location).Path 'workspace.json'
-if (Test-Path -LiteralPath $configurationPath) {
-    $backupDirectory = Join-Path (Get-Location).Path 'outputs/setup'
-    New-Item -ItemType Directory -Path $backupDirectory -Force -ErrorAction Stop | Out-Null
-    $backupPath = Join-Path $backupDirectory ("workspace-before-" + [Guid]::NewGuid().ToString('N') + '.json')
-    Copy-Item -LiteralPath $configurationPath -Destination $backupPath -ErrorAction Stop
-    Write-Output "Previous configuration saved: $backupPath"
-}
-[IO.File]::WriteAllText($configurationPath, $json, $utf8)
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\configure-workspace.ps1
+if ($LASTEXITCODE -ne 0) { throw 'Configuration generation failed; inspect the error' }
 ```
 
 已有 `workspace.json` 会先完整备份到被 Git 忽略的 `outputs/setup/workspace-before-*.json`，备份失败则停止；需要恢复时将该文件复制回 `workspace.json`。新配置使用无 BOM 的 UTF-8，兼容 `doctor.py` 的读取。源码/权重相对路径不随盘符修改；启动器使用 JSON 解释器，编辑器选择不会改变启动器环境。
+
+生成器按模板中的模型遍历，使用每个模型的 `environment`，省略时为 `<model>-demo`，只查询已有环境解释器。新增模型无需修改生成器；对应环境的创建和依赖安装仍按该模型教程执行。已有配置只需局部修改时可直接编辑本机文件，不必重新生成。共享权重可填本机绝对路径，公开模板不写入个人路径，见[扩展指南](extending.md)。
 
 在 VS Code 中打开本仓库文件夹，安装 Python 扩展，再用 **Python: Select Interpreter → Enter interpreter path** 选择当前模型环境的实际 `python.exe`。启动器始终使用本机 `workspace.json`，编辑器选择不会自动切换 Demo 环境。[VS Code Python 设置说明](https://code.visualstudio.com/docs/python/settings-reference)
 
@@ -186,6 +171,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Environment check failed; inspect doctor.json 
 ```
 
 最低验收条件是检查总体 `passed: true`，再完成至少一次样图重建和下载验证。doctor 不加载模型，不替代推理。
+
+新增或单独排查一个模型时可用 `doctor.py --model <name>`。启动前用 `start-demo.ps1 -Model <name> -Check` 检查配置与路径，它不会启动模型或停止当前服务；实际使用的名称来自本机配置。
 
 双击 `启动DUSt3R.cmd`、`启动MASt3R.cmd`、`启动VGGT.cmd`，或执行：
 

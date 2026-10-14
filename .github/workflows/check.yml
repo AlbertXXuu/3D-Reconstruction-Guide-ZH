@@ -23,3 +23,14 @@ jobs:
       - name: Parse PowerShell scripts and tutorial commands
         shell: powershell
         run: .\scripts\check-powershell.ps1
+      - name: Test configurable environment checks on CPU
+        run: python -B -m unittest discover -s tests -p "test_*.py" -v
+      - name: Test launcher preflight without model imports
+        shell: powershell
+        run: .\tests\test-start-demo.ps1
+      - name: Test launcher runtime with a CPU HTTP fixture
+        shell: powershell
+        run: .\tests\test-launcher-runtime.ps1
+      - name: Test configuration generation and backup
+        shell: powershell
+        run: .\tests\test-configure-workspace.ps1

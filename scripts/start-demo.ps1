@@ -1,14 +1,82 @@
 param(
-    [ValidateSet('dust3r', 'mast3r', 'vggt')][string] $Model = 'dust3r',
+    [string] $Model = 'dust3r',
     [switch] $NoBrowser,
-    [switch] $Stop
+    [switch] $Stop,
+    [switch] $Check
 )
 $ErrorActionPreference = 'Stop'
-Add-Type -AssemblyName System.Net.Http
 $workspaceRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $runtimeDirectory = Join-Path $workspaceRoot 'outputs\runtime'
-New-Item -ItemType Directory -Path $runtimeDirectory -Force | Out-Null
 $statePath = Join-Path $runtimeDirectory 'demo-process.json'
+
+function Test-DemoPort([int] $port) {
+    $listener = [Net.Sockets.TcpListener]::new([Net.IPAddress]::Loopback, $port)
+    try {
+        $listener.Start()
+        return $true
+    } catch { return $false } finally { $listener.Stop() }
+}
+
+function Resolve-ModelPath([string] $path) {
+    if ([IO.Path]::IsPathRooted($path)) { return [IO.Path]::GetFullPath($path) }
+    return [IO.Path]::GetFullPath((Join-Path $workspaceRoot $path))
+}
+
+if ($Check -and $Stop) { throw 'Choose either -Check or -Stop.' }
+if (-not $Stop) {
+    $Model = ([string]$Model).ToLowerInvariant()
+    if ($Model -cnotmatch '^[a-z][a-z0-9_-]{0,63}$') {
+        throw 'Model must be a lowercase name, starting with a letter and containing only letters, digits, hyphens or underscores (maximum 64 characters).'
+    }
+    $configPath = Join-Path $workspaceRoot 'workspace.json'
+    if (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) {
+        throw 'workspace.json is missing. Create your local configuration from workspace.example.json first.'
+    }
+    $config = Get-Content -LiteralPath $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    if ($null -eq $config.models -or $config.models -isnot [Management.Automation.PSCustomObject]) {
+        throw 'workspace.json must contain a models object.'
+    }
+    $configuredModels = @($config.models.PSObject.Properties.Name | Sort-Object)
+    $modelProperty = @($config.models.PSObject.Properties | Where-Object { $_.Name -ceq $Model })
+    if ($modelProperty.Count -ne 1) {
+        throw "Model is not configured yet: $Model. Configured models: $($configuredModels -join ', ')."
+    }
+    $modelConfig = $modelProperty[0].Value
+    foreach ($field in @('python', 'script', 'repository', 'checkpoint')) {
+        if ($modelConfig.$field -isnot [string] -or [string]::IsNullOrWhiteSpace($modelConfig.$field)) {
+            throw "Model '$Model' requires a non-empty $field path."
+        }
+    }
+    if (($modelConfig.port -isnot [int] -and $modelConfig.port -isnot [long]) -or $modelConfig.port -lt 1 -or $modelConfig.port -gt 65535) {
+        throw "Model '$Model' requires an integer port between 1 and 65535."
+    }
+    $pythonPath = Resolve-ModelPath $modelConfig.python
+    $scriptPath = Resolve-ModelPath $modelConfig.script
+    $repoPath = Resolve-ModelPath $modelConfig.repository
+    $weightsPath = Resolve-ModelPath $modelConfig.checkpoint
+    foreach ($requiredFile in @($pythonPath, $scriptPath, $weightsPath)) {
+        if (-not (Test-Path -LiteralPath $requiredFile -PathType Leaf)) { throw "Required file missing: $requiredFile" }
+    }
+    if (-not (Test-Path -LiteralPath $repoPath -PathType Container)) { throw "Repository directory missing: $repoPath" }
+    $url = "http://127.0.0.1:$($modelConfig.port)/"
+    if ($Check) {
+        # This branch never imports model code, creates runtime files or reads/stops a managed process.
+        [ordered]@{
+            model = $Model
+            configured_models = $configuredModels
+            python = $pythonPath
+            script = $scriptPath
+            repository = $repoPath
+            weights = $weightsPath
+            port = [int]$modelConfig.port
+            url = $url
+            port_available = Test-DemoPort ([int]$modelConfig.port)
+        } | ConvertTo-Json -Depth 3
+        return
+    }
+}
+
+Add-Type -AssemblyName System.Net.Http
 
 function Get-ManagedProcess($state) {
     $process = Get-CimInstance Win32_Process -Filter "ProcessId = $($state.pid)" -ErrorAction SilentlyContinue
@@ -34,20 +102,6 @@ function Test-DemoHttp([string] $url) {
 }
 
 try {
-    if (-not $Stop) {
-        $config = Get-Content -LiteralPath (Join-Path $workspaceRoot 'workspace.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-        $modelConfig = $config.models.$Model
-        if ($null -eq $modelConfig) { throw "Model is not configured yet: $Model" }
-        $pythonPath = [IO.Path]::GetFullPath($modelConfig.python)
-        $scriptPath = [IO.Path]::GetFullPath((Join-Path $workspaceRoot $modelConfig.script))
-        $repoPath = [IO.Path]::GetFullPath((Join-Path $workspaceRoot $modelConfig.repository))
-        $weightsPath = [IO.Path]::GetFullPath((Join-Path $workspaceRoot $modelConfig.checkpoint))
-        foreach ($requiredFile in @($pythonPath, $scriptPath, $weightsPath)) {
-            if (-not (Test-Path -LiteralPath $requiredFile -PathType Leaf)) { throw "Required file missing: $requiredFile" }
-        }
-        if (-not (Test-Path -LiteralPath $repoPath -PathType Container)) { throw "Repository directory missing: $repoPath" }
-        $url = "http://127.0.0.1:$($modelConfig.port)/"
-    }
     if (Test-Path -LiteralPath $statePath) {
         $state = Get-Content -LiteralPath $statePath -Raw -Encoding UTF8 | ConvertFrom-Json
         $managedProcess = Get-ManagedProcess $state
@@ -60,6 +114,11 @@ try {
                 if (-not $NoBrowser) { Start-Process $state.url }
                 return
             }
+            # Check a different destination before stopping a working demo. The current
+            # managed endpoint may legitimately be reused by a model switch on the same port.
+            if (-not $Stop -and $state.url -ne $url -and -not (Test-DemoPort ([int]$modelConfig.port))) {
+                throw "Local port $($modelConfig.port) is occupied by another program; current managed demo remains running."
+            }
             Write-Output "Stopping managed $($state.model) demo (PID $($state.pid)) to release GPU memory."
             Stop-Process -Id $state.pid -ErrorAction Stop
             Wait-Process -Id $state.pid -Timeout 20 -ErrorAction SilentlyContinue
@@ -70,8 +129,8 @@ try {
         Write-Output 'Managed demo stopped.'
         return
     }
-    $listener = [Net.Sockets.TcpListener]::new([Net.IPAddress]::Loopback, [int]$modelConfig.port)
-    try { $listener.Start() } catch { throw "Local port $($modelConfig.port) is occupied by another program." } finally { $listener.Stop() }
+    if (-not (Test-DemoPort ([int]$modelConfig.port))) { throw "Local port $($modelConfig.port) is occupied by another program." }
+    New-Item -ItemType Directory -Path $runtimeDirectory -Force | Out-Null
     foreach ($variable in @('NO_PROXY', 'no_proxy')) {
         $entries = @([Environment]::GetEnvironmentVariable($variable, 'Process') -split ',' | Where-Object { $_ })
         [Environment]::SetEnvironmentVariable($variable, (($entries + @('127.0.0.1', 'localhost') | Select-Object -Unique) -join ','), 'Process')
